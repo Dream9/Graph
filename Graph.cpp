@@ -6,7 +6,7 @@
  *   a Graph tinyG.txt 期待以下结构
  * 13 13    //代表v,e
  * 0 6      //代表边
- * 1 2
+ * 1 2      //...
  * 
  */
 
@@ -35,7 +35,6 @@ Graph::Graph(std::istream& in) {
 		throw Graph_err(std::to_string(__LINE__) + __FILE__ + _e_err);
 	this->arr.resize(v, {});
 	while (e-->0) {
-
 		in >> v >> w;
 		validate(v);
 		validate(w);
@@ -44,19 +43,21 @@ Graph::Graph(std::istream& in) {
 
 }
 
-void Graph::addEdge(int v, int w) {
+void Graph::addEdge(int first, int second) {
 	//注意这里没有考虑加点的情况
-	--v;//注意点序列为123
-	--w;//对应索引为012
-	arr[v].push_back(w);
-	arr[w].push_back(v);
+	--first;//注意点序列为123
+	--second;//对应索引为012
+	arr[first].push_back(second);
+	arr[second].push_back(first);
 	++e;
 }
 
-Graph::Iterator& Graph::adj(int v) {
+const Graph::Iterator& Graph::adj(int num) const {
 	//返回相连顶点的vector的引用
-	this->validate(v);
-	return this->arr[v];
+	//这里采用vector，，有点浪费空间
+	--num;
+	this->validate(num);
+	return this->arr[num];
 }
 
 std::string Graph::toString()
@@ -76,6 +77,25 @@ std::string Graph::toString()
 	return out;
 }
 
+std::vector<int> Graph::DepthFirstSearch(int num) {
+	//接口，调用dfs友元
+	int len = this->V();
+	std::vector<int> out;
+	std::vector<bool>visited(len,false);
+	//out.reserve(len);
+	dfs(*this, num, visited,out);
+	return out;
+}
+void dfs(const Graph& G, int num, std::vector<bool>&visited, std::vector<int>&out) {
+	visited[num]=true;
+	for (int cur : G.adj(num)) {
+		if (!visited[cur])
+			dfs(G, cur, visited, out);
+	}
+}
+
+
+/*测试函数*/
 int main(int argc, char**argv) {
 	std::ifstream ceshi;
 	ceshi.open("F:/yzhh/VS2017pro/Graph/Graph/data.txt");
